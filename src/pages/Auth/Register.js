@@ -66,6 +66,15 @@ const Register = props => {
             </Typography>
             <form className={classes.form}>
               <FormControl margin="normal" required fullWidth>
+                <InputLabel htmlFor="nickname">Nickname</InputLabel>
+                <Input
+                  id="nickname"
+                  name="nickname"
+                  autoComplete="nickname"
+                  autoFocus
+                />
+              </FormControl>
+              <FormControl margin="normal" required fullWidth>
                 <InputLabel htmlFor="email">Email Address</InputLabel>
                 <Input id="email" name="email" autoComplete="email" autoFocus />
               </FormControl>
@@ -75,6 +84,17 @@ const Register = props => {
                   name="password"
                   type="password"
                   id="password"
+                  autoComplete="current-password"
+                />
+              </FormControl>
+              <FormControl margin="normal" required fullWidth>
+                <InputLabel htmlFor="password_confirmation">
+                  Password confirmation
+                </InputLabel>
+                <Input
+                  name="password_confirmation"
+                  type="password"
+                  id="password_confirmation"
                   autoComplete="current-password"
                 />
               </FormControl>
