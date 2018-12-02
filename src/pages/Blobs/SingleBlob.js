@@ -96,16 +96,11 @@ class Bucket extends React.Component {
     if (!token) {
       return;
     }
-    console.log("token", token);
-    console.log("PPPP", this.props.match.params);
 
     const blobId = this.props.match.params.id;
     const userId = localStorage.getItem("userId");
     const bucketId = this.props.match.params.bucket_id;
 
-    console.log(blobId, bucketId);
-
-    console.log(userId);
     this.setState({
       token,
       userId,

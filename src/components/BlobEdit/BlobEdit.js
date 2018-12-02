@@ -66,8 +66,6 @@ class BlobEdit extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    console.log("PRECIVIVIVIV", prevState);
-
     if (
       this.props.editing &&
       prevProps.editing !== this.props.editing &&
@@ -92,8 +90,6 @@ class BlobEdit extends Component {
   };
 
   handleChange = event => {
-    console.log(event);
-
     let { name, value } = event.target;
 
     this.setState({
@@ -108,9 +104,6 @@ class BlobEdit extends Component {
   };
 
   saveBlobHandler = e => {
-    console.log("PPPPPPP", this.props);
-    console.log("PPPPPPP", this.state);
-
     this.setState({ open: false });
     this.props.onEditBlob(e, this.state);
   };

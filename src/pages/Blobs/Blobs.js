@@ -105,13 +105,10 @@ class Bucket extends React.Component {
     if (!token) {
       return;
     }
-    console.log("token", token);
-    console.log("blobId", this.props.match.params.id);
 
     const bucketId = this.props.match.params.id;
     const userId = localStorage.getItem("userId");
 
-    console.log(userId);
     this.setState({
       token,
       userId,
@@ -133,14 +130,12 @@ class Bucket extends React.Component {
       }
     )
       .then(res => {
-        console.log("RES", res);
         if (res.status !== 200) {
           throw new Error("Failed to load blobs");
         }
         return res.json();
       })
       .then(data => {
-        console.log("BLOBS", data);
         this.setState({
           blobs: data.data.blobs,
           blobLoading: false
@@ -149,8 +144,6 @@ class Bucket extends React.Component {
   };
 
   manageBlobHandler = (e, blobData) => {
-    console.log("BUUUUUU", blobData);
-
     const formData = new FormData();
     formData.append("name", blobData.name);
     formData.append("image", blobData.image);
@@ -170,16 +163,12 @@ class Bucket extends React.Component {
       formData.append("name", blobData.name);
       formData.append("image", blobData.image);
 
-      console.log("BLOB", this.state.blob);
-
       url = `http://localhost:5000/api/users/${uuid}/buckets/${bucket_id}/blobs/${
         this.state.blob.id
       }`;
 
       method = "PUT";
     }
-
-    console.log("DATA", formData.name);
 
     fetch(url, {
       method: method,
@@ -190,7 +179,6 @@ class Bucket extends React.Component {
       body: formData
     })
       .then(res => {
-        console.log(res);
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Creating or editing a bucket failed!");
         }
@@ -206,7 +194,6 @@ class Bucket extends React.Component {
             this.state.bucketId
           );
         } else {
-          console.log("EDIT", data);
           cogoToast.success("Blob created");
 
           this.setState({
@@ -216,7 +203,6 @@ class Bucket extends React.Component {
             isEditing: false
           });
 
-          console.log("THIS", this);
           this.loadBlobs(
             this.state.userId,
             this.state.token,
@@ -256,13 +242,10 @@ class Bucket extends React.Component {
   };
 
   editBlobHandler = blobId => {
-    console.log("id", blobId);
     this.setState(prevState => {
       const blob = {
         ...prevState.blobs.find(blob => blob.id === blobId)
       };
-
-      console.log("ME", blob);
 
       return {
         blob,
@@ -273,7 +256,7 @@ class Bucket extends React.Component {
 
   deleteBlobHandler = blobId => {
     this.setState({ blobLoading: true });
-    console.log("IDE", blobId);
+
     fetch(
       `http://localhost:5000/api/users/${this.state.userId}/buckets/${
         this.state.bucketId
@@ -287,7 +270,6 @@ class Bucket extends React.Component {
       }
     )
       .then(res => {
-        console.log("DELETE");
         if (res.status !== 200 && res.status !== 204) {
           throw new Error("Can not delete");
         }
@@ -295,7 +277,6 @@ class Bucket extends React.Component {
         return res.json();
       })
       .then(data => {
-        console.log(data);
         if (data.delete === true) {
           cogoToast.success("Blob deleted");
 
@@ -307,8 +288,6 @@ class Bucket extends React.Component {
 
           this.setState(prevState => {
             const newBlobs = prevState.blobs.filter(blob => blob.id !== blobId);
-
-            console.log("Delete", newBlobs);
 
             return {
               blobs: newBlobs,

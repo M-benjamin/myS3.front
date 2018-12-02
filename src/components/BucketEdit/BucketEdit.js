@@ -63,8 +63,6 @@ class BucketEdit extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    console.log("PRECIVIVIVIV", prevState);
-
     if (
       this.props.editing &&
       prevProps.editing !== this.props.editing &&
@@ -88,13 +86,11 @@ class BucketEdit extends Component {
 
   handleChange = event => {
     let { name, value } = event.target;
-    console.log(value);
+
     this.setState({ [name]: value });
   };
 
   saveBucketHandler = e => {
-    console.log("PPPPPPP", this.props);
-
     this.setState({ open: false });
     this.props.onEditBucket(e, this.state);
   };
