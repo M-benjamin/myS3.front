@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import AppBar from "@material-ui/core/AppBar";
@@ -86,17 +85,9 @@ const styles = theme => ({
 
 class Bucket extends React.Component {
   state = {
-    auth: true,
-    anchorEl: null,
-    blobs: [],
-    error: "",
-    status: "",
-    blobLoading: true,
+    blob: null,
     token: "",
     userId: "",
-    editLoading: false,
-    blob: null,
-    isEditing: false,
     bucketId: ""
   };
 
@@ -106,10 +97,13 @@ class Bucket extends React.Component {
       return;
     }
     console.log("token", token);
-    console.log("blobId", this.props.match.params.id);
+    console.log("PPPP", this.props.match.params);
 
-    const bucketId = this.props.match.params.id;
+    const blobId = this.props.match.params.id;
     const userId = localStorage.getItem("userId");
+    const bucketId = this.props.match.params.bucket_id;
+
+    console.log(blobId, bucketId);
 
     console.log(userId);
     this.setState({
@@ -118,12 +112,12 @@ class Bucket extends React.Component {
       bucketId
     });
 
-    this.loadBlobs(userId, token, bucketId);
+    this.loadBlob(userId, token, bucketId, blobId);
   }
 
-  loadBlobs = (uuid, tok, bucket_id) => {
+  loadBlob = (uuid, tok, bucket_id, blobId) => {
     fetch(
-      `http://localhost:5000/api/users/${uuid}/buckets/${bucket_id}/blobs`,
+      `http://localhost:5000/api/users/${uuid}/buckets/${bucket_id}/blobs/${blobId}`,
       {
         method: "GET",
         headers: {
@@ -142,95 +136,7 @@ class Bucket extends React.Component {
       .then(data => {
         console.log("BLOBS", data);
         this.setState({
-          blobs: data.data.blobs,
-          blobLoading: false
-        });
-      });
-  };
-
-  manageBlobHandler = (e, blobData) => {
-    console.log("BUUUUUU", blobData);
-
-    const formData = new FormData();
-    formData.append("name", blobData.name);
-    formData.append("image", blobData.image);
-
-    this.setState({
-      editLoading: true
-    });
-
-    let uuid = this.state.userId;
-    let tok = this.state.token;
-    let bucket_id = this.state.bucketId;
-
-    let url = `http://localhost:5000/api/users/${uuid}/buckets/${bucket_id}/blobs`;
-    let method = "POST";
-
-    if (this.state.blob) {
-      formData.append("name", blobData.name);
-      formData.append("image", blobData.image);
-
-      console.log("BLOB", this.state.blob);
-
-      url = `http://localhost:5000/api/users/${uuid}/buckets/${bucket_id}/blobs/${
-        this.state.blob.id
-      }`;
-
-      method = "PUT";
-    }
-
-    console.log("DATA", formData.name);
-
-    fetch(url, {
-      method: method,
-      headers: {
-        Authorization: "Bearer " + tok
-        // "Content-Type": "application/json"
-      },
-      body: formData
-    })
-      .then(res => {
-        console.log(res);
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Creating or editing a bucket failed!");
-        }
-
-        return res.json();
-      })
-      .then(data => {
-        if (data.update === true) {
-          cogoToast.success("Blob updated");
-          this.loadBlobs(
-            this.state.userId,
-            this.state.token,
-            this.state.bucketId
-          );
-        } else {
-          console.log("EDIT", data);
-          cogoToast.success("Blob created");
-
-          this.setState({
-            blobLoading: false,
-            editLoading: false,
-            blob: null,
-            isEditing: false
-          });
-
-          console.log("THIS", this);
-          this.loadBlobs(
-            this.state.userId,
-            this.state.token,
-            this.state.bucketId
-          );
-        }
-      })
-      .catch(err => {
-        cogoToast.error(err.message);
-        this.setState({
-          isEditing: false,
-          blob: null,
-          editLoading: false,
-          error: err
+          // blob: data.data.blobs,
         });
       });
   };
@@ -253,73 +159,6 @@ class Bucket extends React.Component {
 
   redirectTo = () => {
     this.props.history.push(`/`);
-  };
-
-  editBlobHandler = blobId => {
-    console.log("id", blobId);
-    this.setState(prevState => {
-      const blob = {
-        ...prevState.blobs.find(blob => blob.id === blobId)
-      };
-
-      console.log("ME", blob);
-
-      return {
-        blob,
-        isEditing: true
-      };
-    });
-  };
-
-  deleteBlobHandler = blobId => {
-    this.setState({ blobLoading: true });
-    console.log("IDE", blobId);
-    fetch(
-      `http://localhost:5000/api/users/${this.state.userId}/buckets/${
-        this.state.bucketId
-      }/blobs/${blobId}`,
-      {
-        headers: {
-          Authorization: "Bearer " + this.state.token,
-          "Content-Type": "application/json"
-        },
-        method: "DELETE"
-      }
-    )
-      .then(res => {
-        console.log("DELETE");
-        if (res.status !== 200 && res.status !== 204) {
-          throw new Error("Can not delete");
-        }
-
-        return res.json();
-      })
-      .then(data => {
-        console.log(data);
-        if (data.delete === true) {
-          cogoToast.success("Blob deleted");
-
-          this.loadBlobs(
-            this.state.userId,
-            this.state.token,
-            this.state.bucketId
-          );
-
-          this.setState(prevState => {
-            const newBlobs = prevState.blobs.filter(blob => blob.id !== blobId);
-
-            console.log("Delete", newBlobs);
-
-            return {
-              blobs: newBlobs,
-              blobLoading: false
-            };
-          });
-        }
-      })
-      .catch(err => {
-        this.setState({ blobLoading: false });
-      });
   };
 
   render() {
@@ -399,61 +238,15 @@ class Bucket extends React.Component {
                       Back
                     </Button>
                   </Grid>
-                  <Grid item>
-                    <BlobEdit
-                      onEditBlob={this.manageBlobHandler}
-                      selectedBlob={this.state.blob}
-                      editing={this.state.isEditing}
-                    />
-                  </Grid>
                 </Grid>
               </div>
             </div>
           </div>
           <div className={classNames(classes.layout, classes.cardGrid)}>
-            {this.state.blobLoading && (
-              <div style={{ textAlign: "center", marginTop: "1rem" }}>
-                <Loader />
-              </div>
-            )}
-            {this.state.blobs.length <= 0 && !this.state.blobLoading ? (
-              <p style={{ textAlign: "center" }}>No Blob Found</p>
-            ) : null}
-            {/* End hero unit */}
-            <Grid container spacing={40}>
-              {this.state.blobs.map(card => (
-                <Grid item key={card.id} sm={6} md={4} lg={3}>
-                  <Card className={classes.card}>
-                    <CardContent className={classes.cardContent}>
-                      <Typography gutterBottom variant="h5" component="h2">
-                        {card.name}
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      <Button
-                        size="small"
-                        color="primary"
-                        onClick={() => this.editBlobHandler(card.id)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="small"
-                        color="primary"
-                        onClick={() => this.deleteBlobHandler(card.id)}
-                      >
-                        Delete
-                      </Button>
-                      <Link
-                        to={`/single-blob/${this.state.bucketId}/${card.id}`}
-                      >
-                        Show
-                      </Link>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
+            <img
+              src="opt/workspace/myS3/ddb0be3b-aa71-47d0-b8ca-e81c6aaa6a42/benjy"
+              alt=""
+            />
           </div>
         </main>
         {/* Footer */}

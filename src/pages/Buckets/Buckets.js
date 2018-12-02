@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import AppBar from "@material-ui/core/AppBar";
@@ -82,8 +83,6 @@ const styles = theme => ({
     padding: theme.spacing.unit * 6
   }
 });
-
-const cards = [1, 2, 3, 4];
 
 class Bucket extends React.Component {
   state = {
@@ -388,7 +387,7 @@ class Bucket extends React.Component {
             {/* End hero unit */}
             <Grid container spacing={40}>
               {this.state.buckets.map(card => (
-                <Grid item key={card.id} sm={6} md={4} lg={4}>
+                <Grid item key={card.id} sm={6} md={4} lg={3}>
                   <Card className={classes.card}>
                     <CardContent className={classes.cardContent}>
                       <Typography gutterBottom variant="h5" component="h2">
@@ -410,12 +409,13 @@ class Bucket extends React.Component {
                       >
                         Delete
                       </Button>
-                      <Button size="small" color="primary">
-                        Add blob
-                      </Button>
-                      <Button size="small" color="primary">
+                      <Link
+                        to={`/blob/${card.id}`}
+                        size="small"
+                        color="primary"
+                      >
                         List blob
-                      </Button>
+                      </Link>
                     </CardActions>
                   </Card>
                 </Grid>

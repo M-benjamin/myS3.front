@@ -13,6 +13,7 @@ import Login from "pages/Auth/Login";
 import Register from "pages/Auth/Register";
 import Bucket from "pages/Buckets/Buckets";
 import Blob from "pages/Blobs/Blobs";
+import SingleBlob from "pages/Blobs/SingleBlob.js";
 
 import logo from "./logo.svg";
 import "./App.css";
@@ -171,7 +172,12 @@ class App extends Component {
             exact
             render={props => <Bucket {...props} logout={this.logoutHandler} />}
           />
-          <Route path="/blob" exact render={props => <Blob {...props} />} />
+          <Route path="/blob/:id" exact render={props => <Blob {...props} />} />
+          <Route
+            path="/single-blob/:bucket_id/:id"
+            exact
+            render={props => <SingleBlob {...props} />}
+          />
         </Switch>
       );
     }
