@@ -21,6 +21,9 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormGroup from "@material-ui/core/FormGroup";
 import MenuItem from "@material-ui/core/MenuItem";
 import Menu from "@material-ui/core/Menu";
+import Loader from "components/Loader/Loader";
+import BucketEdit from "components/BucketEdit/BucketEdit";
+import cogoToast from "cogo-toast";
 
 const styles = theme => ({
   root: {
@@ -88,7 +91,13 @@ class Bucket extends React.Component {
     anchorEl: null,
     buckets: [],
     error: "",
-    status: ""
+    status: "",
+    bucketLoading: true,
+    token: "",
+    userId: "",
+    editLoading: false,
+    bucket: null,
+    isEditing: false
   };
 
   componentDidMount() {
@@ -96,27 +105,13 @@ class Bucket extends React.Component {
     if (!token) {
       return;
     }
-
     console.log("token", token);
-    console.log("token", this.state);
-
     const userId = localStorage.getItem("userId");
-
     console.log(userId);
-
-    // fetch("URL")
-    //   .then(res => {
-    //     if (res.status !== 200) {
-    //       throw new Error("Faile to load user status");
-    //     }
-    //     return res.json();
-    //   })
-    //   .then(data => {
-    //     this.setState({
-    //       status: data.status
-    //     });
-    //   })
-    //   .catch(this.catchError);
+    this.setState({
+      token,
+      userId
+    });
 
     this.loadBuckets(userId, token);
   }
@@ -140,8 +135,149 @@ class Bucket extends React.Component {
       .then(data => {
         console.log("BUCKET", data);
         this.setState({
-          buckets: data.data.buckets
+          buckets: data.data.buckets,
+          bucketLoading: false
         });
+      });
+  };
+
+  editBucketsHandler = bucketId => {
+    console.log("id", bucketId);
+    this.setState(prevState => {
+      const bucket = {
+        ...prevState.buckets.find(buck => buck.id === bucketId)
+      };
+
+      console.log("ME", bucket);
+
+      return {
+        bucket,
+        isEditing: true
+      };
+    });
+  };
+
+  manageBucketHandler = (e, bucketData) => {
+    console.log("BUUUUUU", bucketData);
+    const formData = new FormData();
+
+    formData.append("name", bucketData.name);
+
+    this.setState({
+      editLoading: true
+    });
+
+    let uuid = this.state.userId;
+    let tok = this.state.token;
+
+    let url = `http://localhost:5000/api/users/${uuid}/buckets`;
+    let method = "POST";
+
+    if (this.state.bucket) {
+      console.log("BUCKET", this.state.bucket);
+      url = `http://localhost:5000/api/users/${uuid}/buckets/${
+        this.state.bucket.id
+      }`;
+
+      method = "PUT";
+    }
+
+    console.log("METHOS", method);
+    console.log("METHOS 2", formData);
+    console.log("METHOS 2", bucketData.name);
+
+    fetch(url, {
+      method: method,
+      headers: {
+        Authorization: "Bearer " + tok,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: bucketData.name
+      })
+    })
+      .then(res => {
+        console.log(res);
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error("Creating or editing a bucket failed!");
+        }
+
+        return res.json();
+      })
+      .then(data => {
+        if (data.update === true) {
+          cogoToast.success("Bucket updated");
+          this.loadBuckets(this.state.userId, this.state.token);
+        } else {
+          console.log("EDIT", data);
+          cogoToast.success("Bucket created");
+
+          this.setState({
+            bucketLoading: false,
+            editLoading: false,
+            bucket: null,
+            isEditing: false
+          });
+
+          console.log("THIS", this);
+          this.loadBuckets(this.state.userId, this.state.token);
+        }
+      })
+      .catch(err => {
+        this.setState({
+          isEditing: false,
+          bucket: null,
+          editLoading: false,
+          error: err
+        });
+      });
+  };
+
+  deleteBucketsHandler = bucketId => {
+    this.setState({ bucketLoading: true });
+    console.log("IDE", bucketId);
+    fetch(
+      `http://localhost:5000/api/users/${
+        this.state.userId
+      }/buckets/${bucketId}`,
+      {
+        headers: {
+          Authorization: "Bearer " + this.state.token,
+          "Content-Type": "application/json"
+        },
+        method: "DELETE"
+      }
+    )
+      .then(res => {
+        console.log("DELETE");
+        if (res.status !== 200 && res.status !== 204) {
+          throw new Error("Can not delete");
+        }
+
+        return res.json();
+      })
+      .then(data => {
+        console.log(data);
+        if (data.delete === true) {
+          cogoToast.success("Bucket deleted");
+          // this.loadBuckets(this.state.userId, this.state.token);
+
+          this.setState(prevState => {
+            const newBuckets = prevState.buckets.filter(
+              buck => buck.id !== bucketId
+            );
+
+            console.log("Delete", newBuckets);
+
+            return {
+              buckets: newBuckets,
+              bucketLoading: false
+            };
+          });
+        }
+      })
+      .catch(err => {
+        this.setState({ bucketLoading: false });
       });
   };
 
@@ -230,24 +366,29 @@ class Bucket extends React.Component {
               <div className={classes.heroButtons}>
                 <Grid container spacing={16} justify="center">
                   <Grid item>
-                    <Button variant="contained" color="primary">
-                      Create bucket
-                    </Button>
-                  </Grid>
-                  <Grid item>
-                    <Button variant="outlined" color="primary">
-                      List blobs
-                    </Button>
+                    <BucketEdit
+                      onEditBucket={this.manageBucketHandler}
+                      selectedBucket={this.state.bucket}
+                      editing={this.state.isEditing}
+                    />
                   </Grid>
                 </Grid>
               </div>
             </div>
           </div>
           <div className={classNames(classes.layout, classes.cardGrid)}>
+            {this.state.bucketLoading && (
+              <div style={{ textAlign: "center", marginTop: "1rem" }}>
+                <Loader />
+              </div>
+            )}
+            {this.state.buckets.length <= 0 && !this.state.bucketLoading ? (
+              <p style={{ textAlign: "center" }}>No Bucket Found</p>
+            ) : null}
             {/* End hero unit */}
             <Grid container spacing={40}>
               {this.state.buckets.map(card => (
-                <Grid item key={card.id} sm={6} md={4} lg={3}>
+                <Grid item key={card.id} sm={6} md={4} lg={4}>
                   <Card className={classes.card}>
                     <CardContent className={classes.cardContent}>
                       <Typography gutterBottom variant="h5" component="h2">
@@ -255,11 +396,25 @@ class Bucket extends React.Component {
                       </Typography>
                     </CardContent>
                     <CardActions>
-                      <Button size="small" color="primary">
-                        View
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={() => this.editBucketsHandler(card.id)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={() => this.deleteBucketsHandler(card.id)}
+                      >
+                        Delete
                       </Button>
                       <Button size="small" color="primary">
-                        Edit
+                        Add blob
+                      </Button>
+                      <Button size="small" color="primary">
+                        List blob
                       </Button>
                     </CardActions>
                   </Card>
