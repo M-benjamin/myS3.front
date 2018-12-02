@@ -172,25 +172,23 @@ class App extends Component {
             exact
             render={props => <Bucket {...props} logout={this.logoutHandler} />}
           />
-          <Route path="/blob/:id" exact render={props => <Blob {...props} />} />
+          <Route
+            path="/blob/:id"
+            exact
+            render={props => <Blob {...props} logout={this.logoutHandler} />}
+          />
           <Route
             path="/single-blob/:bucket_id/:id"
             exact
-            render={props => <SingleBlob {...props} />}
+            render={props => (
+              <SingleBlob {...props} logout={this.logoutHandler} />
+            )}
           />
         </Switch>
       );
     }
 
-    return (
-      <div>
-        <Link to="/">Login</Link>
-        <Link to="/bucket">Dashbord</Link>
-        <Link to="/register">Register</Link>
-
-        {routes}
-      </div>
-    );
+    return <div>{routes}</div>;
   }
 }
 
