@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
@@ -48,76 +48,107 @@ const styles = theme => ({
   }
 });
 
-const Register = props => {
-  const { classes } = props;
+class Register extends Component {
+  state = {
+    nickname: "",
+    email: "",
+    password: "",
+    password_confirmation: ""
+  };
 
-  return (
-    <div>
-      <div className="background" />
-      <div className="background2">
-        <main className={classes.main}>
-          <CssBaseline />
-          <Paper className={classes.paper}>
-            <Avatar className={classes.avatar}>
-              <LockIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Register
-            </Typography>
-            <form className={classes.form}>
-              <FormControl margin="normal" required fullWidth>
-                <InputLabel htmlFor="nickname">Nickname</InputLabel>
-                <Input
-                  id="nickname"
-                  name="nickname"
-                  autoComplete="nickname"
-                  autoFocus
-                />
-              </FormControl>
-              <FormControl margin="normal" required fullWidth>
-                <InputLabel htmlFor="email">Email Address</InputLabel>
-                <Input id="email" name="email" autoComplete="email" autoFocus />
-              </FormControl>
-              <FormControl margin="normal" required fullWidth>
-                <InputLabel htmlFor="password">Password</InputLabel>
-                <Input
-                  name="password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                />
-              </FormControl>
-              <FormControl margin="normal" required fullWidth>
-                <InputLabel htmlFor="password_confirmation">
-                  Password confirmation
-                </InputLabel>
-                <Input
-                  name="password_confirmation"
-                  type="password"
-                  id="password_confirmation"
-                  autoComplete="current-password"
-                />
-              </FormControl>
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
+  handleChange = event => {
+    let { name, value } = event.target;
+    this.setState({ [name]: value });
+  };
+
+  render() {
+    const { classes } = this.props;
+    const { nickname, email, password, password_confirmation } = this.state;
+
+    return (
+      <div>
+        <div className="background" />
+        <div className="background2">
+          <main className={classes.main}>
+            <CssBaseline />
+            <Paper className={classes.paper}>
+              <Avatar className={classes.avatar}>
+                <LockIcon />
+              </Avatar>
+              <Typography component="h1" variant="h5">
+                Register
+              </Typography>
+              <form
+                className={classes.form}
+                onSubmit={e => this.props.onSignup(e, this.state)}
               >
-                Sign in
-              </Button>
-            </form>
-          </Paper>
-        </main>
+                <FormControl margin="normal" required fullWidth>
+                  <InputLabel htmlFor="nickname">Nickname</InputLabel>
+                  <Input
+                    id="nickname"
+                    name="nickname"
+                    autoComplete="nickname"
+                    value={nickname}
+                    onChange={this.handleChange}
+                    autoFocus
+                  />
+                </FormControl>
+                <FormControl margin="normal" required fullWidth>
+                  <InputLabel htmlFor="email">Email Address</InputLabel>
+                  <Input
+                    id="email"
+                    name="email"
+                    autoComplete="email"
+                    autoFocus
+                    value={email}
+                    onChange={this.handleChange}
+                  />
+                </FormControl>
+                <FormControl margin="normal" required fullWidth>
+                  <InputLabel htmlFor="password">Password</InputLabel>
+                  <Input
+                    name="password"
+                    type="password"
+                    id="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={this.handleChange}
+                  />
+                </FormControl>
+                <FormControl margin="normal" required fullWidth>
+                  <InputLabel htmlFor="password_confirmation">
+                    Password confirmation
+                  </InputLabel>
+                  <Input
+                    name="password_confirmation"
+                    type="password"
+                    id="password_confirmation"
+                    autoComplete="current-password"
+                    value={password_confirmation}
+                    onChange={this.handleChange}
+                  />
+                </FormControl>
+                <FormControlLabel
+                  control={<Checkbox value="remember" color="primary" />}
+                  label="Remember me"
+                />
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                >
+                  Sign in
+                </Button>
+              </form>
+            </Paper>
+          </main>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 Register.propTypes = {
   classes: PropTypes.object.isRequired

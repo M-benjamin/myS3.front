@@ -3,13 +3,8 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import indexRoutes from "routes/index.js";
 
 import { Router, Route, Switch } from "react-router-dom";
-import Dashboard from "layout/Dashboard/Dashboard";
-import Login from "pages/Auth/Login";
-import Register from "pages/Auth/Register";
-
 import { createBrowserHistory } from "history";
 const hist = createBrowserHistory();
 

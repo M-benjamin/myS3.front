@@ -92,55 +92,36 @@ class Bucket extends React.Component {
   };
 
   componentDidMount() {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      return;
-    }
+    fetch("URL")
+      .then(res => {
+        if (res.status !== 200) {
+          throw new Error("Faile to load user status");
+        }
+        return res.json();
+      })
+      .then(data => {
+        this.setState({
+          status: data.status
+        });
+      })
+      .catch(this.catchError);
 
-    console.log("token", token);
-    console.log("token", this.state);
-
-    const userId = localStorage.getItem("userId");
-
-    console.log(userId);
-
-    // fetch("URL")
-    //   .then(res => {
-    //     if (res.status !== 200) {
-    //       throw new Error("Faile to load user status");
-    //     }
-    //     return res.json();
-    //   })
-    //   .then(data => {
-    //     this.setState({
-    //       status: data.status
-    //     });
-    //   })
-    //   .catch(this.catchError);
-
-    this.loadBuckets(userId, token);
+    this.loadBuckets();
   }
 
-  loadBuckets = (uuid, tok) => {
-    console.log(tok);
-    fetch(`http://localhost:5000/api/users/${uuid}/buckets`, {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + tok,
-        Accept: "application/json"
-      }
-    })
+  loadBuckets = direction => {
+    let uuid = "095ff234-f509-11e8-8eb2-f2801f1b9fd1";
+    fetch(`http://localhost:5000/api/users/${uuid}/buckets`)
       .then(res => {
         console.log("RES", res);
         if (res.status !== 200) {
           throw new Error("Failed to load buckets");
         }
-        return res.json();
       })
       .then(data => {
-        console.log("BUCKET", data);
+        console.log("RES", data);
         this.setState({
-          buckets: data.data.buckets
+          buckets: data.buckets
         });
       });
   };
@@ -157,9 +138,8 @@ class Bucket extends React.Component {
     this.setState({ anchorEl: event.currentTarget });
   };
 
-  onLogout = () => {
+  handleClose = () => {
     this.setState({ anchorEl: null });
-    this.props.logout();
   };
 
   render() {
@@ -207,7 +187,7 @@ class Bucket extends React.Component {
                   onClose={this.handleClose}
                 >
                   <MenuItem onClick={this.handleClose}>Profile</MenuItem>
-                  <MenuItem onClick={this.onLogout}>Logout</MenuItem>
+                  <MenuItem onClick={this.handleClose}>My account</MenuItem>
                 </Menu>
               </div>
             )}
@@ -246,12 +226,16 @@ class Bucket extends React.Component {
           <div className={classNames(classes.layout, classes.cardGrid)}>
             {/* End hero unit */}
             <Grid container spacing={40}>
-              {this.state.buckets.map(card => (
-                <Grid item key={card.id} sm={6} md={4} lg={3}>
+              {cards.map(card => (
+                <Grid item key={card} sm={6} md={4} lg={3}>
                   <Card className={classes.card}>
                     <CardContent className={classes.cardContent}>
                       <Typography gutterBottom variant="h5" component="h2">
-                        {card.name}
+                        Heading
+                      </Typography>
+                      <Typography>
+                        This is a media card. You can use this section to
+                        describe the content.
                       </Typography>
                     </CardContent>
                     <CardActions>
